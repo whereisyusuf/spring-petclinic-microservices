@@ -43,11 +43,43 @@ jobs:
       run: |
         mvn clean package -DskipTests -Denv=cloud
 
-    - name: Upload build artifact JAR files for the deploy jobs
+    - name: Upload api-gateway JAR file for the deploy job
       uses: actions/upload-artifact@v3.1.0
       with:
-        name: petclinic-jars
-        path: spring-petclinic-api-gateway/target
+        name: api-gateway-jar
+        path: ${{ env.API_GATEWAY_JAR }}
+        if-no-files-found: error
+        retention-days: 7
+
+    - name: Upload admin-server JAR file for the deploy job
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: admin-server-jar
+        path: ${{ env.ADMIN_SERVER_JAR }}
+        if-no-files-found: error
+        retention-days: 7
+
+    - name: Upload customer-service JAR file for the deploy job
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: customer-service-jar
+        path: ${{ env.CUSTOMERS_SERVICE_JAR }}
+        if-no-files-found: error
+        retention-days: 7
+
+    - name: Upload vets-service JAR file for the deploy job
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: vets-service-jar
+        path: ${{ env.VETS_SERVICE_JAR }}
+        if-no-files-found: error
+        retention-days: 7
+
+    - name: Upload visits-service JAR file for the deploy job
+      uses: actions/upload-artifact@v3.1.0
+      with:
+        name: visits-service-jar
+        path: ${{ env.VISITS_SERVICE_JAR }}
         if-no-files-found: error
         retention-days: 7
 
@@ -71,7 +103,7 @@ jobs:
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
       with:
-        name: petclinic-jars
+        name: api-gateway-jar
 
     - name: deploy
       uses: Azure/spring-cloud-deploy@v1
@@ -104,7 +136,7 @@ jobs:
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
       with:
-        name: petclinic-jars
+        name: admin-server-jar
 
     - name: deploy
       uses:  Azure/spring-cloud-deploy@v1
@@ -137,7 +169,7 @@ jobs:
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
       with:
-        name: petclinic-jars
+        name: customer-service-jar
 
     - name: deploy
       uses: Azure/spring-cloud-deploy@v1
@@ -175,7 +207,7 @@ jobs:
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
       with:
-        name: petclinic-jars
+        name: vets-service-jar
 
     - name: deploy
       uses: Azure/spring-cloud-deploy@v1
@@ -213,7 +245,7 @@ jobs:
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
       with:
-        name: petclinic-jars
+        name: visits-service-jar
 
     - name: deploy
       uses: Azure/spring-cloud-deploy@v1
