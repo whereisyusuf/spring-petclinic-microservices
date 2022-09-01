@@ -72,7 +72,6 @@ jobs:
       uses: actions/download-artifact@v3.0.0
       with:
         name: petclinic-jars
-        path: spring-petclinic-api-gateway/target
 
     - name: deploy
       uses: Azure/spring-cloud-deploy@v1
@@ -106,7 +105,6 @@ jobs:
       uses: actions/download-artifact@v3.0.0
       with:
         name: petclinic-jars
-        path: spring-petclinic-api-gateway/target
 
     - name: deploy
       uses:  Azure/spring-cloud-deploy@v1
@@ -140,7 +138,6 @@ jobs:
       uses: actions/download-artifact@v3.0.0
       with:
         name: petclinic-jars
-        path: spring-petclinic-api-gateway/target
 
     - name: deploy
       uses: Azure/spring-cloud-deploy@v1
@@ -179,7 +176,6 @@ jobs:
       uses: actions/download-artifact@v3.0.0
       with:
         name: petclinic-jars
-        path: spring-petclinic-api-gateway/target
 
     - name: deploy
       uses: Azure/spring-cloud-deploy@v1
@@ -218,7 +214,6 @@ jobs:
       uses: actions/download-artifact@v3.0.0
       with:
         name: petclinic-jars
-        path: spring-petclinic-api-gateway/target
 
     - name: deploy
       uses: Azure/spring-cloud-deploy@v1
