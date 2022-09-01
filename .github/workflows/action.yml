@@ -72,7 +72,7 @@ jobs:
     needs: build
 
     steps:
-    - name: Login with Key Vault SP
+    - name: Login with Key Vault SP (liimted scope to KV only)
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -83,6 +83,11 @@ jobs:
         keyvault: ${{ env.KEYVAULT }}
         secrets: "AZURE-CREDENTIALS-FOR-SPRING"
       id: keyvaultaction
+
+    - name: Login with SP retrieve from Key Vault (RG scoped SP)
+      run:
+        az login --service-principal -u ${{ steps.keyvaultaction.outputs.clientId }} -p ${{ steps.keyvaultaction.outputs.clientSecret }} --tenant
+        ${{ steps.keyvaultaction.outputs.tenantId }}
 
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
@@ -98,7 +103,7 @@ jobs:
         echo "--------- FIND github workspace: "${{ github.workspace }}"
         find "${{ github.workspace }}"
         echo "--------- Subscription: ${{ env.AZURE_SUBSCRIPTION }}"
-        echo "--------- Sping Apps Service: ${{ env.SPRING_APPS_SERVICE }}"
+        echo "--------- Spring Apps Service: ${{ env.SPRING_APPS_SERVICE }}"
         echo "--------- App Name: ${{ env.API_GATEWAY }}"
         echo "--------- Package: ${{ github.workspace }}/${{ env.API_GATEWAY_JAR }}"
 
