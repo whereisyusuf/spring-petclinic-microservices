@@ -72,7 +72,7 @@ jobs:
     needs: build
 
     steps:
-    - name: Login with Key Vault SP (liimted scope to KV only)
+    - name: Login with Key Vault SP (KV-scoped SP)
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -84,10 +84,18 @@ jobs:
         secrets: "AZURE-CREDENTIALS-FOR-SPRING"
       id: keyvaultaction
 
-    - name: Login with SP retrieve from Key Vault (RG scoped SP)
-      run:
-        az login --service-principal -u ${{ steps.keyvaultaction.outputs.clientId }} -p ${{ steps.keyvaultaction.outputs.clientSecret }} --tenant
-        ${{ steps.keyvaultaction.outputs.tenantId }}
+    - name: Debugging step
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          env
+          echo "steps.keyvaultaction.outputs = ${{ steps.keyvaultaction.outputs }}"
+
+    - name: Login with Key Vault SP (RG-scoped SP)
+      uses: azure/login@v1
+      with:
+        creds: ${{ steps.keyvaultaction.outputs.AZURE-CREDENTIALS-FOR-SPRING }}
 
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
