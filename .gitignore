@@ -23,3 +23,9 @@ generated/
 # Skip scripts
 .scripts/
 .vscode/settings.json
+
+# Azure CLI (local defaults)
+.azure/config
+
+# Service Principals output to file
+*-sp.json
