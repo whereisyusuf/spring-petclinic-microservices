@@ -49,7 +49,7 @@
         </dependency>
 
         <!-- Spring Cloud-->
-        <!-- Unecessary for Azure Spring Cloud with App Insight IPA 3.0 enabled
+        <!-- Unecessary for Azure Spring Apps with App Insight IPA 3.0 enabled
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-sleuth-zipkin</artifactId>
@@ -67,7 +67,7 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
         </dependency>
-        <!-- Unecessary for Azure Spring Cloud with App Insight IPA 3.0 enabled
+        <!-- Unecessary for Azure Spring Aps with App Insight IPA 3.0 enabled
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-sleuth</artifactId>

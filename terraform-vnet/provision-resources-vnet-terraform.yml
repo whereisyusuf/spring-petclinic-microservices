@@ -1,4 +1,4 @@
-# Provisions an Azure Spring Cloud environment on a virtual network.
+# Provisions an Azure Spring Apps environment on a virtual network.
 # Note: This pipeline must be run with a Service Connection that has the Owner role on the target resource group.
 
 name: Provision Resources
@@ -42,6 +42,6 @@ steps:
     provider: 'azurerm'
     workingDirectory: '$(Build.Repository.LocalPath)/terraform-vnet'
     command: 'apply'
-    commandOptions: '-auto-approve -var resource_group=$(RESOURCE_GROUP) -var spring_cloud_service=$(SPRING_CLOUD_NAME) -var mysql_server_admin_password=$(MYSQL_PASSWORD)'
+    commandOptions: '-auto-approve -var resource_group=$(RESOURCE_GROUP) -var spring_apps_service=$(SPRING_APPS_NAME) -var mysql_server_admin_password=$(MYSQL_PASSWORD)'
     environmentServiceNameAzureRM: '$(SERVICE_CONNECTION_NAME)'
 

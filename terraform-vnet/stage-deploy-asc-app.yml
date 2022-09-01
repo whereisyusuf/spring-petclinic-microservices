@@ -6,8 +6,8 @@ variables:
   value: d$(Build.BuildId)
 
 parameters:
-- name: spring_cloud_name
-  default: $(SPRING_CLOUD_NAME)
+- name: spring_apps_name
+  default: $(SPRING_APPS_NAME)
 - name: application_name
   default: $(application.name)
   
@@ -38,7 +38,7 @@ stages:
         azureSubscription: '$(SERVICE_CONNECTION_NAME)'
         Action: 'Delete Staging Deployment'
         AppName: '${{parameters.application_name}}'
-        AzureSpringCloud: '${{parameters.spring_cloud_name}}'
+        AzureSpringCloud: '${{parameters.spring_apps_name}}'
         
 
     - task: AzureSpringCloud@0
@@ -46,7 +46,7 @@ stages:
       inputs:
         azureSubscription: '$(SERVICE_CONNECTION_NAME)'
         Action: 'Deploy'
-        AzureSpringCloud: '${{parameters.spring_cloud_name}}'
+        AzureSpringCloud: '${{parameters.spring_apps_name}}'
         AppName: '${{parameters.application_name}}'
         UseStagingDeployment: false
         DeploymentName: '$(DeploymentName)'
@@ -63,7 +63,7 @@ stages:
       inputs:
         azureSubscription: '$(SERVICE_CONNECTION_NAME)'
         Action: 'Set Production'
-        AzureSpringCloud: '${{parameters.spring_cloud_name}}'
+        AzureSpringCloud: '${{parameters.spring_apps_name}}'
         AppName: '${{parameters.application_name}}'
         UseStagingDeployment: false
         DeploymentName: '$(DeploymentName)'

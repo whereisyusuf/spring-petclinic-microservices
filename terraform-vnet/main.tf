@@ -13,7 +13,7 @@ variable "region" {
   type    = string
   default = "West US 2"
 }
-variable "spring_cloud_service" {
+variable "spring_apps_service" {
   type    = string
 }
 variable "api_gateway" {
@@ -108,7 +108,7 @@ resource "azurerm_role_assignment" "ra" {
 }
 
 resource "azurerm_spring_cloud_service" "example" {
-  name                = var.spring_cloud_service
+  name                = var.spring_apps_service
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
 

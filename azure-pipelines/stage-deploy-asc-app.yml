@@ -4,8 +4,8 @@ variables:
 - group: azure-environment
 
 parameters:
-- name: spring_cloud_name
-  default: $(SPRING_CLOUD_NAME)
+- name: spring_apps_name
+  default: $(SPRING_APPS_NAME)
 - name: resource_group
   default: $(RESOURCE_GROUP)
 - name: application_name
@@ -67,8 +67,8 @@ stages:
         scriptType: 'bash'
         scriptLocation: 'inlineScript'
         inlineScript: |
-          az extension add -n spring-cloud -y
+          az extension add -n spring -y
           echo "Currently active deployment: ${previouslyActiveDeployment}"
-          az spring-cloud app set-deployment --deployment 'd$(Build.BuildId)' --resource-group '${{parameters.resource_group}}' --service '${{parameters.spring_cloud_name}}' --name '${{parameters.application_name}}' --verbose
+          az spring app set-deployment --deployment 'd$(Build.BuildId)' --resource-group '${{parameters.resource_group}}' --service '${{parameters.spring_apps_name}}' --name '${{parameters.application_name}}' --verbose
           echo 'New active deployment: d$(Build.BuildId)'
 

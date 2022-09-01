@@ -34,6 +34,6 @@ steps:
   inputs:
     provider: 'azurerm'
     command: 'apply'
-    commandOptions: '-auto-approve -var resource_group=$(RESOURCE_GROUP) -var spring_cloud_service=$(SPRING_CLOUD_NAME) -var mysql_server_admin_password=$(MYSQL_PASSWORD)'
+    commandOptions: '-auto-approve -var resource_group=$(RESOURCE_GROUP) -var spring_apps_service=$(SPRING_APPS_NAME) -var mysql_server_admin_password=$(MYSQL_PASSWORD)'
     environmentServiceNameAzureRM: '$(SERVICE_CONNECTION_NAME)'
     workingDirectory: $(Build.Repository.LocalPath)/terraform

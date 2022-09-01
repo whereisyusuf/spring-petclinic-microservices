@@ -99,10 +99,10 @@ steps:
           --server ${MYSQL_SERVER_NAME} --value "US/Pacific"
 
 - task: AzureCLI@2
-  name: configure_azure_spring_cloud
-  displayName: Configure Azure Spring Cloud
+  name: configure_azure_spring_apps
+  displayName: Configure Azure Spring Apps
   inputs:
     azureSubscription: '$(SERVICE_CONNECTION_NAME)'
     scriptType: 'bash'
     scriptLocation: 'scriptPath'
-    scriptPath: 'azure-pipelines/setup-azure-spring-cloud.sh'
+    scriptPath: 'azure-pipelines/setup-azure-spring-apps.sh'

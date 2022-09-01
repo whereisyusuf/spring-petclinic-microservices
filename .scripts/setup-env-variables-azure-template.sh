@@ -3,10 +3,10 @@
 # ==== Resource Group ====
 export SUBSCRIPTION=subscription-id # customize this
 export RESOURCE_GROUP=resource-group-name # customize this
-export REGION=westus2
+export REGION=westus2 # customize this
 
 # ==== Service and App Instances ====
-export SPRING_CLOUD_SERVICE=azure-spring-cloud-name # customize this
+export SPRING_APPS_SERVICE=azure-spring-apps-name # customize this
 export API_GATEWAY=api-gateway
 export ADMIN_SERVER=admin-server
 export CUSTOMERS_SERVICE=customers-service
