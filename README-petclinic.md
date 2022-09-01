@@ -101,7 +101,7 @@ A JMeter load testing script is available to stress the application and generate
 
 * An anonymous access and a Prometheus datasource are setup.
 * A `Spring Petclinic Metrics` Dashboard is available at the URL http://localhost:3000/d/69JXeR0iw/spring-petclinic-metrics.
-You will find the JSON configuration file here: [docker/grafana/dashboards/grafana-petclinic-dashboard.json]().
+You will find the JSON configuration file here: [docker/grafana/dashboards/grafana-petclinic-dashboard.json](./docker/grafana/dashboards/grafana-petclinic-dashboard.json).
 * You may create your own dashboard or import the [Micrometer/SpringBoot dashboard](https://grafana.com/dashboards/4701) via the Import Dashboard menu item.
 The id for this dashboard is `4701`.
 
