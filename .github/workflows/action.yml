@@ -95,7 +95,7 @@ jobs:
     - name: Login with Key Vault SP (RG-scoped SP)
       uses: azure/login@v1
       with:
-        creds: ${{ steps.keyvaultaction.outputs.AZURE-CREDENTIALS-FOR-SPRING }}
+        creds: ${{ env.AZURE-CREDENTIALS-FOR-SPRING }}
 
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
