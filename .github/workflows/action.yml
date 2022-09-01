@@ -5,9 +5,9 @@ on:
     branches: ["azure"]
 
 env:
-  AZURE_SUBSCRIPTION: ${{ secrets.AZURE_SUBSCRIPTION }} # define this secret in GitHub
-  SPRING_APPS_SERVICE: ${{ secrets.SPRING_APPS_SERVICE }} # # define this secret in GitHub
-  KEYVAULT: ${{ secrets.KEYVAULT }} # # define this secret in GitHub
+  AZURE_SUBSCRIPTION: ${{ secrets.AZURE_SUBSCRIPTION }} # define this secret in GitHub secrets
+  SPRING_APPS_SERVICE: ${{ secrets.SPRING_APPS_SERVICE }} # define this secret in GitHub secrets
+  KEYVAULT: ${{ secrets.KEYVAULT }} # define this secret in GitHub secrets
 
   # ==== APPS ====:
   API_GATEWAY: api-gateway
@@ -23,11 +23,12 @@ env:
   VETS_SERVICE_JAR: spring-petclinic-vets-service-2.5.1.jar
   VISITS_SERVICE_JAR: spring-petclinic-visits-service-2.5.1.jar
 
-  API_GATEWAY_JAR_BUILD_PATH: spring-petclinic-api-gateway/target/${{ env.API_GATEWAY_JAR }}
-  ADMIN_SERVER_JAR_BUILD_PATH: spring-petclinic-admin-server/target/${{ env.ADMIN_SERVER_JAR }}
-  CUSTOMERS_SERVICE_JAR_BUILD_PATH: spring-petclinic-customers-service/target/${{ env.CUSTOMERS_SERVICE_JAR }}
-  VETS_SERVICE_JAR_BUILD_PATH: spring-petclinic-vets-service/target/${{ env.VETS_SERVICE_JAR }}
-  VISITS_SERVICE_JAR_BUILD_PATH: spring-petclinic-visits-service/target/${{ env.VISITS_SERVICE_JAR }}
+  # ==== JAR BUILD PATHS ====:
+  API_GATEWAY_JAR_BUILD_PATH: spring-petclinic-api-gateway/target
+  ADMIN_SERVER_JAR_BUILD_PATH: spring-petclinic-admin-server/target
+  CUSTOMERS_SERVICE_JAR_BUILD_PATH: spring-petclinic-customers-service/target
+  VETS_SERVICE_JAR_BUILD_PATH: spring-petclinic-vets-service/target
+  VISITS_SERVICE_JAR_BUILD_PATH: spring-petclinic-visits-service/target
 
 jobs:
 
@@ -52,11 +53,11 @@ jobs:
     - name: Gather build artifacts into single directory
       run: |
         mkdir artifacts
-        cp ${{ env.API_GATEWAY_JAR_BUILD_PATH }} artifacts/
-        cp ${{ env.ADMIN_SERVER_JAR_BUILD_PATH }} artifacts/
-        cp ${{ env.CUSTOMERS_SERVICE_JAR_BUILD_PATH }} artifacts/
-        cp ${{ env.VETS_SERVICE_JAR_BUILD_PATH }} artifacts/
-        cp ${{ env.VISITS_SERVICE_JAR_BUILD_PATH }} artifacts/
+        cp ${{ env.API_GATEWAY_JAR_BUILD_PATH }}/${{ env.API_GATEWAY_JAR }} artifacts/
+        cp ${{ env.ADMIN_SERVER_JAR_BUILD_PATH }}/${{ env.ADMIN_SERVER_JAR }} artifacts/
+        cp ${{ env.CUSTOMERS_SERVICE_JAR_BUILD_PATH }}/${{ env.CUSTOMERS_SERVICE_JAR }} artifacts/
+        cp ${{ env.VETS_SERVICE_JAR_BUILD_PATH }}/${{ env.VETS_SERVICE_JAR }} artifacts/
+        cp ${{ env.VISITS_SERVICE_JAR_BUILD_PATH }}/${{ env.VISITS_SERVICE_JAR }} artifacts/
 
     - name: Upload built JAR files as an artifact
       uses: actions/upload-artifact@v3.1.0
