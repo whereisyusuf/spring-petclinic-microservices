@@ -24,32 +24,10 @@ env:
   VISITS_SERVICE_JAR: spring-petclinic-visits-service/target/spring-petclinic-visits-service-2.5.1.jar
 
 jobs:
+
   build:
     runs-on: ubuntu-latest
     steps:
-    - name: Login with Key Vault SP
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Get service SP from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KEYVAULT }}
-        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
-      id: keyvaultaction
-    
-    - name: Get MySQL Secrets from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KEYVAULT }}
-        secrets: "MYSQL-SERVER-FULL-NAME,MYSQL-DATABASE-NAME,MYSQL-SERVER-ADMIN-LOGIN-NAME,MYSQL-SERVER-ADMIN-PASSWORD"
-      id: mysqlsecrets
-      
-    - name: Login with Service SP
-      uses: azure/login@v1
-      with:
-        creds: ${{ steps.keyvaultaction.outputs.AZURE-CREDENTIALS-FOR-SPRING }}
         
     - name: Checkout your repo
       uses: actions/checkout@v2
@@ -64,8 +42,25 @@ jobs:
     - name: maven build, clean
       run: |
         mvn clean package -DskipTests -Denv=cloud
-      
-    - name: Deploy api-gateway
+
+  deploy-api-gateway:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Login with Key Vault SP
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Get service SP from Key Vault
+      uses: Azure/get-keyvault-secrets@v1
+      with:
+        keyvault: ${{ env.KEYVAULT }}
+        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
+      id: keyvaultaction
+
+    - name: deploy
       uses: Azure/spring-cloud-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
@@ -75,8 +70,25 @@ jobs:
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.API_GATEWAY_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
+  
+  deploy-admin-server:
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+    - name: Login with Key Vault SP
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
     
-    - name: Deploy admin-server
+    - name: Get service SP from Key Vault
+      uses: Azure/get-keyvault-secrets@v1
+      with:
+        keyvault: ${{ env.KEYVAULT }}
+        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
+      id: keyvaultaction
+
+    - name: deploy
       uses:  Azure/spring-cloud-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
@@ -85,9 +97,26 @@ jobs:
         app-name: ${{ env.ADMIN_SERVER }}
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.ADMIN_SERVER_JAR }}
-        jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql    
+        jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
+  
+  deploy-customer-service:
+    runs-on: ubuntu-latest
+    needs: build
 
-    - name: Deploy customers-service
+    steps:
+    - name: Login with Key Vault SP
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+    
+    - name: Get service SP from Key Vault
+      uses: Azure/get-keyvault-secrets@v1
+      with:
+        keyvault: ${{ env.KEYVAULT }}
+        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
+      id: keyvaultaction
+
+    - name: deploy
       uses: Azure/spring-cloud-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
