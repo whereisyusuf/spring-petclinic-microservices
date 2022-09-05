@@ -81,19 +81,6 @@ jobs:
       with:
         name: petclinic-jars
 
-    - name: Debugging API gateway deployment
-      run: |
-        echo "--------- LS cwd: $(pwd)"
-        ls -al "$(pwd)"
-        echo "--------- LS github workspace: "${{ github.workspace }}"
-        ls -al "${{ github.workspace }}"
-        echo "--------- FIND github workspace: "${{ github.workspace }}"
-        find "${{ github.workspace }}"
-        echo "--------- Subscription: ${{ env.AZURE_SUBSCRIPTION }}"
-        echo "--------- Spring Apps Service: ${{ env.SPRING_APPS_SERVICE }}"
-        echo "--------- App Name: ${{ env.API_GATEWAY }}"
-        echo "--------- Package: ${{ github.workspace }}/${{ env.API_GATEWAY_JAR }}"
-
     - name: deploy
       uses: Azure/spring-cloud-deploy@v1
       with:
