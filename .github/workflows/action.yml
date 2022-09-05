@@ -28,7 +28,7 @@ env:
   CUSTOMERS_SERVICE_JAR_BUILD_PATH: spring-petclinic-customers-service/target
   VETS_SERVICE_JAR_BUILD_PATH: spring-petclinic-vets-service/target
   VISITS_SERVICE_JAR_BUILD_PATH: spring-petclinic-visits-service/target
-
+  
 jobs:
 
   build:
@@ -66,7 +66,7 @@ jobs:
         if-no-files-found: error
         retention-days: 7
 
-  deploy-api-gateway:
+  deploy:
     runs-on: ubuntu-latest
     needs: build
 
@@ -76,12 +76,12 @@ jobs:
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Download JAR file to deploy
+    - name: Download JAR files to deploy
       uses: actions/download-artifact@v3.0.0
       with:
         name: petclinic-jars
 
-    - name: deploy
+    - name: deploy-api-server
       uses: Azure/spring-cloud-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
@@ -91,23 +91,8 @@ jobs:
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.API_GATEWAY_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
-  
-  deploy-admin-server:
-    runs-on: ubuntu-latest
-    needs: build
 
-    steps:
-    - name: Login with Key Vault SP (scoped to Resource Group)
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Download JAR file to deploy
-      uses: actions/download-artifact@v3.0.0
-      with:
-        name: petclinic-jars
-
-    - name: deploy
+    - name: deploy-admin-server
       uses:  Azure/spring-cloud-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
@@ -117,23 +102,8 @@ jobs:
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.ADMIN_SERVER_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
-  
-  deploy-customer-service:
-    runs-on: ubuntu-latest
-    needs: build
 
-    steps:
-    - name: Login with Key Vault SP (scoped to Resource Group)
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Download JAR file to deploy
-      uses: actions/download-artifact@v3.0.0
-      with:
-        name: petclinic-jars
-
-    - name: deploy
+    - name: deploy-customer-service
       uses: Azure/spring-cloud-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
@@ -149,22 +119,7 @@ jobs:
         -MYSQL_SERVER_ADMIN_LOGIN_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }} \
         -MYSQL_SERVER_ADMIN_PASSWORD ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
 
-  deploy-vets-service:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-    - name: Login with Key Vault SP (scoped to Resource Group)
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Download JAR file to deploy
-      uses: actions/download-artifact@v3.0.0
-      with:
-        name: petclinic-jars
-
-    - name: deploy
+    - name: deploy-vets-service
       uses: Azure/spring-cloud-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
@@ -180,22 +135,7 @@ jobs:
         -MYSQL_SERVER_ADMIN_LOGIN_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }} \
         -MYSQL_SERVER_ADMIN_PASSWORD ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
 
-  deploy-visits-service:
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-    - name: Login with Key Vault SP (scoped to Resource Group)
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Download JAR file to deploy
-      uses: actions/download-artifact@v3.0.0
-      with:
-        name: petclinic-jars
-
-    - name: deploy
+    - name: deploy-vists-service
       uses: Azure/spring-cloud-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
