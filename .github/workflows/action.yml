@@ -7,7 +7,6 @@ on:
 env:
   AZURE_SUBSCRIPTION: ${{ secrets.AZURE_SUBSCRIPTION }} # define this secret in GitHub secrets
   SPRING_APPS_SERVICE: ${{ secrets.SPRING_APPS_SERVICE }} # define this secret in GitHub secrets
-  KEYVAULT: ${{ secrets.KEYVAULT }} # define this secret in GitHub secrets
 
   # ==== APPS ====:
   API_GATEWAY: api-gateway
@@ -72,30 +71,10 @@ jobs:
     needs: build
 
     steps:
-    - name: Login with Key Vault SP (KV-scoped SP)
+    - name: Login with Key Vault SP (scoped to Resource Group)
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Get service SP from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KEYVAULT }}
-        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
-      id: keyvaultaction
-
-    - name: Debugging step
-      uses: azure/CLI@v1
-      with:
-        azcliversion: 2.30.0
-        inlineScript: |
-          env
-          echo "steps.keyvaultaction.outputs = ${{ steps.keyvaultaction.outputs }}"
-
-    - name: Login with Key Vault SP (RG-scoped SP)
-      uses: azure/login@v1
-      with:
-        creds: ${{ env.AZURE-CREDENTIALS-FOR-SPRING }}
 
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
@@ -131,17 +110,10 @@ jobs:
     needs: build
 
     steps:
-    - name: Login with Key Vault SP
+    - name: Login with Key Vault SP (scoped to Resource Group)
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Get service SP from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KEYVAULT }}
-        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
-      id: keyvaultaction
 
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
@@ -164,7 +136,7 @@ jobs:
     needs: build
 
     steps:
-    - name: Login with Key Vault SP
+    - name: Login with Key Vault SP (scoped to Resource Group)
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -202,7 +174,7 @@ jobs:
     needs: build
 
     steps:
-    - name: Login with Key Vault SP
+    - name: Login with Key Vault SP (scoped to Resource Group)
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -240,7 +212,7 @@ jobs:
     needs: build
 
     steps:
-    - name: Login with Key Vault SP
+    - name: Login with Key Vault SP (scoped to Resource Group)
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
