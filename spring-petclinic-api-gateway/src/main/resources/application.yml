@@ -23,3 +23,46 @@ spring:
             - Path=/api/customer/**
           filters:
             - StripPrefix=2
+---
+spring:
+  config:
+    activate:
+      on-profile: aca
+  cloud:
+    gateway:
+      routes:
+        - id: vets-service
+          uri: ${VETS_SERVICE_URL}
+          predicates:
+            - Path=/api/vet/**
+          filters:
+            - StripPrefix=2
+        - id: visits-service
+          uri: ${VISITS_SERVICE_URL}
+          predicates:
+            - Path=/api/visit/**
+          filters:
+            - StripPrefix=2
+        - id: customers-service
+          uri: ${CUSTOMERS_SERVICE_URL}
+          predicates:
+            - Path=/api/customer/**
+          filters:
+            - StripPrefix=2
+#from https://github.com/Azure-Samples/spring-petclinic-microservices-config/blob/master/api-gateway.yml
+zuul:
+  prefix: /api
+  ignoredServices: '*'
+  routes:
+    vets-service: /vet/**
+    visits-service: /visit/**
+    customers-service: /customer/**
+    api-gateway: /gateway/**
+server:
+  port: 8080
+  compression:
+    enabled: true
+    mime-types: application/json,text/css,application/javascript
+    min-response-size: 2048
+# Internationalization
+spring.messages.basename: messages/messages

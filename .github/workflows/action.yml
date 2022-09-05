@@ -1,4 +1,4 @@
-name: Deploy to Azure Spring Apps with Key Vault
+name: Deploy to Azure Spring Apps and Container Apps
 
 on:
   push:
@@ -7,6 +7,9 @@ on:
 env:
   AZURE_SUBSCRIPTION: ${{ secrets.AZURE_SUBSCRIPTION }} # define this secret in GitHub secrets
   SPRING_APPS_SERVICE: ${{ secrets.SPRING_APPS_SERVICE }} # define this secret in GitHub secrets
+  CONTAINER_APPS_ENV: ${{ secrets.CONTAINER_APPS_ENV }} # define this secret in GitHub secrets
+  CONTAINER_APPS_RG: ${{ secrets.CONTAINER_APPS_RG }} # define this secret in GitHub secrets
+  CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }} # define this secret in GitHub secrets
 
   # ==== APPS ====:
   API_GATEWAY: api-gateway
@@ -66,7 +69,7 @@ jobs:
         if-no-files-found: error
         retention-days: 7
 
-  deploy:
+  deploy-to-Spring-Apps:
     runs-on: ubuntu-latest
     needs: build
 
@@ -114,10 +117,10 @@ jobs:
         package: ${{ github.workspace }}/${{ env.CUSTOMERS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
         # Environment variables to be entered using the syntax '-key value'. Values containing spaces should be enclosed in double quotes.
-        environment-variables: "-MYSQL_SERVER_FULL_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-FULL-NAME }} \
-        -MYSQL_DATABASE_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-DATABASE-NAME }} \
-        -MYSQL_SERVER_ADMIN_LOGIN_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }} \
-        -MYSQL_SERVER_ADMIN_PASSWORD ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
+        environment-variables: "-MYSQL_SERVER_FULL_NAME ${{ secrets.MYSQL_SERVER_FULL_NAME }} \
+        -MYSQL_DATABASE_NAME ${{ secrets.MYSQL_DATABASE_NAME }} \
+        -MYSQL_SERVER_ADMIN_LOGIN_NAME ${{ secrets.MYSQL_SERVER_ADMIN_LOGIN_NAME }} \
+        -MYSQL_SERVER_ADMIN_PASSWORD ${{ secrets.MYSQL_SERVER_ADMIN_PASSWORD }}"
 
     - name: deploy-vets-service
       uses: Azure/spring-cloud-deploy@v1
@@ -130,10 +133,10 @@ jobs:
         package: ${{ github.workspace }}/${{ env.VETS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
         # Environment variables to be entered using the syntax '-key value'. Values containing spaces should be enclosed in double quotes.
-        environment-variables: "-MYSQL_SERVER_FULL_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-FULL-NAME }} \
-        -MYSQL_DATABASE_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-DATABASE-NAME }} \
-        -MYSQL_SERVER_ADMIN_LOGIN_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }} \
-        -MYSQL_SERVER_ADMIN_PASSWORD ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
+        environment-variables: "-MYSQL_SERVER_FULL_NAME ${{ secrets.MYSQL_SERVER_FULL_NAME }} \
+        -MYSQL_DATABASE_NAME ${{ secrets.MYSQL_DATABASE_NAME }} \
+        -MYSQL_SERVER_ADMIN_LOGIN_NAME ${{ secrets.MYSQL_SERVER_ADMIN_LOGIN_NAME }} \
+        -MYSQL_SERVER_ADMIN_PASSWORD ${{ secrets.MYSQL_SERVER_ADMIN_PASSWORD }}"
 
     - name: deploy-vists-service
       uses: Azure/spring-cloud-deploy@v1
@@ -146,7 +149,61 @@ jobs:
         package: ${{ github.workspace }}/${{ env.VISITS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
         # Environment variables to be entered using the syntax '-key value'. Values containing spaces should be enclosed in double quotes.
-        environment-variables: "-MYSQL_SERVER_FULL_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-FULL-NAME }} \
-        -MYSQL_DATABASE_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-DATABASE-NAME }} \
-        -MYSQL_SERVER_ADMIN_LOGIN_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }} \
-        -MYSQL_SERVER_ADMIN_PASSWORD ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
+        environment-variables: "-MYSQL_SERVER_FULL_NAME ${{ secrets.MYSQL_SERVER_FULL_NAME }} \
+        -MYSQL_DATABASE_NAME ${{ secrets.MYSQL_DATABASE_NAME }} \
+        -MYSQL_SERVER_ADMIN_LOGIN_NAME ${{ secrets.MYSQL_SERVER_ADMIN_LOGIN_NAME }} \
+        -MYSQL_SERVER_ADMIN_PASSWORD ${{ secrets.MYSQL_SERVER_ADMIN_PASSWORD }}"
+
+  deploy-to-Container-Apps:
+
+    runs-on: ubuntu-latest
+    needs: deploy-to-Spring-Apps
+    
+    steps:
+    - name: Login with SP
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Download JAR files to deploy
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: petclinic-jars
+
+    - name: Build api-gateway container image
+      run: docker build ${{ github.workspace }}/${{ env.API_GATEWAY_JAR }} --file docker/Dockerfile-aca --tag "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}" --build-arg PORT=8080 
+
+    - name: Login to the Azure Container Registry  
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.CONTAINER_REGISTRY }}.azurecr.io
+        username: ${{ secrets.CONTAINER_REGISTRY_USERNAME }}
+        password: ${{ secrets.CONTAINER_REGISTRY_PASSWORD }}
+    
+    - name: Push the api-gateway container image to ACR
+      run: |
+        docker push "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}"
+
+    - name: Deploy apps to Container App
+      uses: Azure/cli@v1
+      with:
+        inlineScript: |
+          az config set extension.use_dynamic_install=yes_without_prompt
+
+          echo Deploy app-gateway
+          az containerapp create \
+            --name ${{ env.API_GATEWAY }} \
+            --resource-group ${{ env.CONTAINER_APPS_RG }} \
+            --image "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}" \
+            --environment ${{ env.CONTAINER_APPS_ENV }} \
+            --registry-server ${{ env.CONTAINER_REGISTRY }}.azurecr.io \
+            --registry-username ${{ secrets.CONTAINER_REGISTRY_USERNAME }} \
+            --registry-password ${{ secrets.CONTAINER_REGISTRY_PASSWORD }} \
+            --min-replicas 1 \
+            --max-replicas 1 \
+            --cpu 1 \
+            --memory 2.0Gi \
+            --env-vars VETS_SERVICE_URL=https://${{ env.SPRING_CLOUD_SERVICE }}-${{ env.VETS_SERVICE }}.azuremicroservices.io \
+                       VISITS_SERVICE_URL=https://${{ env.SPRING_CLOUD_SERVICE }}-${{ env.VISITS_SERVICE }}.azuremicroservices.io \
+                       CUSTOMERS_SERVICE_URL=https://${{ env.SPRING_CLOUD_SERVICE }}-${{ env.CUSTOMERS_SERVICE }}.azuremicroservices.io
+                       
