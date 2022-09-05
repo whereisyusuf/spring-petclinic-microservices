@@ -219,7 +219,7 @@ jobs:
   deploy-to-Container-Apps:
 
     runs-on: ubuntu-latest
-    needs: deploy-to-Spring-Apps
+    needs: [deploy-customer-service,deploy-vets-service,deploy-visits-service]
     
     steps:
     - name: Login with SP
