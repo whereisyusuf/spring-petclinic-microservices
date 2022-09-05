@@ -127,13 +127,6 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Get service SP from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KEYVAULT }}
-        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
-      id: keyvaultaction
 
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
@@ -165,13 +158,6 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Get service SP from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KEYVAULT }}
-        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
-      id: keyvaultaction
 
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
@@ -203,13 +189,6 @@ jobs:
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
-    
-    - name: Get service SP from Key Vault
-      uses: Azure/get-keyvault-secrets@v1
-      with:
-        keyvault: ${{ env.KEYVAULT }}
-        secrets: "AZURE-CREDENTIALS-FOR-SPRING"
-      id: keyvaultaction
 
     - name: Download JAR file to deploy
       uses: actions/download-artifact@v3.0.0
