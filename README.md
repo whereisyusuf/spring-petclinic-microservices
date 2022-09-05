@@ -772,6 +772,7 @@ In this quickstart, you've deployed an existing Spring Boot-based app using Azur
 
 * [Azure Spring Apps](https://azure.microsoft.com/services/spring-apps/)
 * [Azure Spring Apps docs](https://docs.microsoft.com/azure/spring-apps/)
+* [Azure Spring Apps GitHub Action](https://github.com/marketplace/actions/azure-spring-apps)
 * [Deploy Spring microservices from scratch](https://github.com/microsoft/azure-spring-cloud-training)
 * [Deploy existing Spring microservices](https://github.com/Azure-Samples/azure-spring-cloud)
 * [Azure for Java Cloud Developers](https://docs.microsoft.com/en-us/azure/java/)
