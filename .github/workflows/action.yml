@@ -171,7 +171,7 @@ jobs:
         name: petclinic-jars
 
     - name: Build api-gateway container image
-      run: docker build ${{ github.workspace }}/${{ env.API_GATEWAY_JAR }} --file docker/Dockerfile-aca --tag "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}" --build-arg PORT=8080 
+      run: docker build . --file docker/Dockerfile-aca --tag "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}" --build-arg PORT=8080 --build-arg JAR_FILE=${{ env.API_GATEWAY_JAR }}
 
     - name: Login to the Azure Container Registry  
       uses: azure/docker-login@v1

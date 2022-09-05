@@ -1,6 +1,6 @@
 FROM adoptopenjdk:8-jre-hotspot
 ENV SPRING_PROFILES_ACTIVE aca
-ARG JAR_FILE=*.jar
+ARG JAR_FILE
 COPY ${JAR_FILE} app.jar
 ARG PORT
 EXPOSE ${PORT}
