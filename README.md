@@ -665,10 +665,17 @@ Add them as secrets to your Key Vault:
 To generate a service principal to access the Key Vault, execute command below:
 
 ```bash
-    az ad sp create-for-rbac --role contributor --scopes /subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT} --sdk-auth
+    az ad sp create-for-rbac --role contributor --scopes /subscriptions/${SUBSCRIPTION}/resourceGroups/${RESOURCE_GROUP}/providers/Microsoft.KeyVault/vaults/${KEY_VAULT} --sdk-auth > akv-sp.json
 ```
 
 Then, follow [the steps here](https://docs.microsoft.com/azure/spring-apps/github-actions-key-vault#add-access-policies-for-the-credential) to add an access policy for this Service Principal.
+
+```sh
+    # Add an access policy to Azure Key Vault to allow KV SP to read secrets.
+    SP_CLIENT_ID="$(cat akv-sp.json | jq -r .clientId)"
+    az keyvault set-policy --name ${KEY_VAULT} \
+         --spn ${SP_CLIENT_ID} --secret-permissions get list
+```
 
 Lastly, add this service principal as secret named "AZURE_CREDENTIALS" in your forked GitHub repo following [the steps here](https://docs.microsoft.com/azure/spring-apps/how-to-github-actions?pivots=programming-language-java#set-up-github-repository-and-authenticate-1).
 
@@ -696,10 +703,10 @@ If you skipped the [Automation step](#automate-deployments-using-github-actions)
 
 ```bash
     az keyvault create --name ${KEY_VAULT} -g ${RESOURCE_GROUP}
-    export KEY_VAULT_URI=$(az keyvault show --name ${KEY_VAULT} | jq -r '.properties.vaultUri')
+    KEY_VAULT_URI=$(az keyvault show --name ${KEY_VAULT} | jq -r '.properties.vaultUri')
 ```
 
-Store database connection secrets in Key Vault.
+Store database connection secrets in Key Vault (if not already set in early steps above).
 
 ```bash
     az keyvault secret set --vault-name ${KEY_VAULT} \
@@ -720,14 +727,14 @@ Store database connection secrets in Key Vault.
 Enable System Assigned Identities for applications and export identities to environment.
 
 ```bash
-    az spring app identity assign --name ${CUSTOMERS_SERVICE}
-    export CUSTOMERS_SERVICE_IDENTITY=$(az spring app show --name ${CUSTOMERS_SERVICE} | jq -r '.identity.principalId')
+    az spring app identity assign --name ${CUSTOMERS_SERVICE} --system-assigned
+    CUSTOMERS_SERVICE_IDENTITY=$(az spring app show --name ${CUSTOMERS_SERVICE} | jq -r '.identity.principalId')
     
-    az spring app identity assign --name ${VETS_SERVICE}
-    export VETS_SERVICE_IDENTITY=$(az spring app show --name ${VETS_SERVICE} | jq -r '.identity.principalId')
+    az spring app identity assign --name ${VETS_SERVICE} --system-assigned
+    VETS_SERVICE_IDENTITY=$(az spring app show --name ${VETS_SERVICE} | jq -r '.identity.principalId')
     
-    az spring app identity assign --name ${VISITS_SERVICE}
-    export VISITS_SERVICE_IDENTITY=$(az spring app show --name ${VISITS_SERVICE} | jq -r '.identity.principalId')
+    az spring app identity assign --name ${VISITS_SERVICE} --system-assigned
+    VISITS_SERVICE_IDENTITY=$(az spring app show --name ${VISITS_SERVICE} | jq -r '.identity.principalId')
 ```
 
 ### Grant Managed Identities with access to Azure Key Vault
@@ -750,19 +757,16 @@ Add an access policy to Azure Key Vault to allow Managed Identities to read secr
 Activate applications to load secrets from Azure Key Vault.
 
 ```bash
-    # DO NOT FORGET to replace the value for "azure.keyvault.uri" JVM startup parameter with your Key Vault URI
     az spring app update --name ${CUSTOMERS_SERVICE} \
-        --jvm-options='-Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=https://petclinic-keyvault.vault.azure.net/' \
+        --jvm-options="'-Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=${KEY_VAULT_URI}'" \
         --env
-    
-    # DO NOT FORGET to replace the value for "azure.keyvault.uri" JVM startup parameter with your Key Vault URI    
+
     az spring app update --name ${VETS_SERVICE} \
-        --jvm-options='-Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=https://petclinic-keyvault.vault.azure.net/' \
+        --jvm-options="'-Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=${KEY_VAULT_URI}'" \
         --env
-    
-    # DO NOT FORGET to replace the value for "azure.keyvault.uri" JVM startup parameter with your Key Vault URI       
+
     az spring app update --name ${VISITS_SERVICE} \
-        --jvm-options='-Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=https://petclinic-keyvault.vault.azure.net/' \
+        --jvm-options="'-Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=${KEY_VAULT_URI}'" \
         --env
 ```
 

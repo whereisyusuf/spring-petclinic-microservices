@@ -7,6 +7,7 @@ on:
 env:
   AZURE_SUBSCRIPTION: ${{ secrets.AZURE_SUBSCRIPTION }} # define this secret in GitHub secrets
   SPRING_APPS_SERVICE: ${{ secrets.SPRING_APPS_SERVICE }} # define this secret in GitHub secrets
+  KEYVAULT: ${{ secrets.KEY_VAULT }} # define this secret in GitHub secrets
 
   # ==== APPS ====:
   API_GATEWAY: api-gateway
@@ -150,11 +151,8 @@ jobs:
         app-name: ${{ env.CUSTOMERS_SERVICE }}
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.CUSTOMERS_SERVICE_JAR }}
-        jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
-        environment-variables: -MYSQL_SERVER_FULL_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-FULL-NAME }}" \
-          -MYSQL_DATABASE_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-DATABASE-NAME }}" \
-          -MYSQL_SERVER_ADMIN_LOGIN_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }}" \
-          -MYSQL_SERVER_ADMIN_PASSWORD "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
+        jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=https://${{ env.KEYVAULT }}.vault.azure.net/
+
 
   deploy-vets-service:
     runs-on: ubuntu-latest
@@ -182,11 +180,7 @@ jobs:
         app-name: ${{ env.VETS_SERVICE }}
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.VETS_SERVICE_JAR }}
-        jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
-        environment-variables: -MYSQL_SERVER_FULL_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-FULL-NAME }}" \
-          -MYSQL_DATABASE_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-DATABASE-NAME }}" \
-          -MYSQL_SERVER_ADMIN_LOGIN_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }}" \
-          -MYSQL_SERVER_ADMIN_PASSWORD "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
+        jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=https://${{ env.KEYVAULT }}.vault.azure.net/
 
   deploy-visits-service:
     runs-on: ubuntu-latest
@@ -214,8 +208,4 @@ jobs:
         app-name: ${{ env.VISITS_SERVICE }}
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.VISITS_SERVICE_JAR }}
-        jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
-        environment-variables: -MYSQL_SERVER_FULL_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-FULL-NAME }} \
-          -MYSQL_DATABASE_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-DATABASE-NAME }}" \
-          -MYSQL_SERVER_ADMIN_LOGIN_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }}" \
-          -MYSQL_SERVER_ADMIN_PASSWORD "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
+        jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=https://${{ env.KEYVAULT }}.vault.azure.net/
