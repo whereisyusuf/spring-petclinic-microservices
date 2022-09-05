@@ -33,6 +33,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+
     steps:
         
     - name: Checkout your repo
@@ -82,7 +84,7 @@ jobs:
         name: petclinic-jars
 
     - name: deploy-api-server
-      uses: Azure/spring-cloud-deploy@v1
+      uses: azure/spring-apps-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
         action: deploy
@@ -93,7 +95,7 @@ jobs:
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
 
     - name: deploy-admin-server
-      uses:  Azure/spring-cloud-deploy@v1
+      uses:  azure/spring-apps-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
         action: deploy
@@ -104,7 +106,7 @@ jobs:
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
 
     - name: deploy-customer-service
-      uses: Azure/spring-cloud-deploy@v1
+      uses: azure/spring-apps-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
         action: deploy
@@ -120,7 +122,7 @@ jobs:
         -MYSQL_SERVER_ADMIN_PASSWORD ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
 
     - name: deploy-vets-service
-      uses: Azure/spring-cloud-deploy@v1
+      uses: azure/spring-apps-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
         action: deploy
@@ -130,13 +132,13 @@ jobs:
         package: ${{ github.workspace }}/${{ env.VETS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
         # Environment variables to be entered using the syntax '-key value'. Values containing spaces should be enclosed in double quotes.
-        environment-variables: "-MYSQL_SERVER_FULL_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-FULL-NAME }} \
-        -MYSQL_DATABASE_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-DATABASE-NAME }} \
-        -MYSQL_SERVER_ADMIN_LOGIN_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }} \
-        -MYSQL_SERVER_ADMIN_PASSWORD ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
+        environment-variables: -MYSQL_SERVER_FULL_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-FULL-NAME }}" \
+          -MYSQL_DATABASE_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-DATABASE-NAME }}" \
+          -MYSQL_SERVER_ADMIN_LOGIN_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }}" \
+          -MYSQL_SERVER_ADMIN_PASSWORD "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
 
     - name: deploy-vists-service
-      uses: Azure/spring-cloud-deploy@v1
+      uses: azure/spring-apps-deploy@v1
       with:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
         action: deploy
@@ -146,7 +148,7 @@ jobs:
         package: ${{ github.workspace }}/${{ env.VISITS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
         # Environment variables to be entered using the syntax '-key value'. Values containing spaces should be enclosed in double quotes.
-        environment-variables: "-MYSQL_SERVER_FULL_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-FULL-NAME }} \
-        -MYSQL_DATABASE_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-DATABASE-NAME }} \
-        -MYSQL_SERVER_ADMIN_LOGIN_NAME ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }} \
-        -MYSQL_SERVER_ADMIN_PASSWORD ${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
+        environment-variables: -MYSQL_SERVER_FULL_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-FULL-NAME }} \
+          -MYSQL_DATABASE_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-DATABASE-NAME }}" \
+          -MYSQL_SERVER_ADMIN_LOGIN_NAME "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-LOGIN-NAME }}" \
+          -MYSQL_SERVER_ADMIN_PASSWORD "${{ steps.mysqlsecrets.outputs.MYSQL-SERVER-ADMIN-PASSWORD }}"
