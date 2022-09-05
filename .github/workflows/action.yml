@@ -203,7 +203,7 @@ jobs:
             --max-replicas 1 \
             --cpu 1 \
             --memory 2.0Gi \
-            --env-vars VETS_SERVICE_URL=https://${{ env.SPRING_CLOUD_SERVICE }}-${{ env.VETS_SERVICE }}.azuremicroservices.io \
-                       VISITS_SERVICE_URL=https://${{ env.SPRING_CLOUD_SERVICE }}-${{ env.VISITS_SERVICE }}.azuremicroservices.io \
-                       CUSTOMERS_SERVICE_URL=https://${{ env.SPRING_CLOUD_SERVICE }}-${{ env.CUSTOMERS_SERVICE }}.azuremicroservices.io
+            --env-vars VETS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.VETS_SERVICE }}.azuremicroservices.io \
+                       VISITS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.VISITS_SERVICE }}.azuremicroservices.io \
+                       CUSTOMERS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.CUSTOMERS_SERVICE }}.azuremicroservices.io
                        
