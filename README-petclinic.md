@@ -91,6 +91,8 @@ have been instrumented with [MicroMeter](https://micrometer.io) to collect JVM a
 
 A JMeter load testing script is available to stress the application and generate metrics: [petclinic_test_plan.jmx](spring-petclinic-api-gateway/src/test/jmeter/petclinic_test_plan.jmx)
 
+To run the JMeter load testing script, you'll require [UltimateThreadGroup](https://jmeter-plugins.org/wiki/UltimateThreadGroup/) plugin to be installed into JMeter's `lib/ext` directory.  If you are using JMeter via the Windows Chocolatey package manager, then download the [UltimateThreadGroup ZIP](https://jmeter-plugins.org/?search=jpgc-casutg) file and place the contained files under: `C:\ProgramData\chocolatey\lib\jmeter\tools\apache-jmeter-5.5\lib` and `C:\ProgramData\chocolatey\lib\jmeter\tools\apache-jmeter-5.5\lib\ext`.
+
 ![Grafana metrics dashboard](docs/grafana-custom-metrics-dashboard.png)
 
 ### Using Prometheus

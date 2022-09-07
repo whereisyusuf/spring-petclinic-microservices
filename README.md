@@ -49,6 +49,7 @@ In addition, you will need the following:
 | [MySQL CLI](https://dev.mysql.com/downloads/shell/)
 | [Git](https://git-scm.com/)
 | [`jq` utility](https://stedolan.github.io/jq/download/)
+| [JMeter](https://jmeter.apache.org/) - Optional, if you want to run load tests
 
 Note -  The [`jq` utility](https://stedolan.github.io/jq/download/). On Windows, download [this Windows port of JQ](https://github.com/stedolan/jq/releases) and add the following to the `~/.bashrc` file:
 
