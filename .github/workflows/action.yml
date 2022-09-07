@@ -282,6 +282,8 @@ jobs:
               --registry-password ${{ secrets.CONTAINER_REGISTRY_PASSWORD }} \
               --min-replicas 1 \
               --max-replicas 1 \
+              --ingress 'external' \
+              --target-port 8080 \
               --cpu 1 \
               --memory 2.0Gi \
               --env-vars VETS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.VETS_SERVICE }}.azuremicroservices.io \
