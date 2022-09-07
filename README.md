@@ -375,6 +375,23 @@ Create a MySQL database in Azure Database for MySQL:
      --server ${MYSQL_SERVER_NAME} --value $MYSQL_TIME_ZONE
 ```
 
+To reset the database at any point:
+
+```sh
+    mysql -u ${MYSQL_SERVER_ADMIN_LOGIN_NAME} \
+     -h ${MYSQL_SERVER_FULL_NAME} -P 3306 -p
+```
+
+```mysql
+USE petclinic;
+DROP TABLE pets;
+DROP TABLE owners;
+DROP TABLE types;
+quit
+```
+
+Then restart one of the services that uses the DB, like `customer-service`.
+
 ### Deploy Spring Boot applications and set environment variables
 
 Deploy Spring Boot applications to Azure.
