@@ -214,14 +214,6 @@ jobs:
         package: ${{ github.workspace }}/${{ env.API_GATEWAY_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
 
-    - name: Get api-gateway URL for the deployed spring app
-      uses: Azure/cli@v1
-      with:
-        inlineScript: |
-          az config set extension.use_dynamic_install=yes_without_prompt
-          FRONTEND_URL=$(az spring app show --name ${{ env.API_GATEWAY }} --query properties.url -o tsv)
-          echo "View spring apps version of api-gateway at: $FRONTEND_URL"
-
   # OPTIONAL: If you want to also deploy the api-gateway to Container Apps (otherwise comment out this job)
   deploy-api-gateway-containerapps:
     runs-on: ubuntu-latest
@@ -298,16 +290,3 @@ jobs:
                 --image "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}"
           fi
 
-    - name: Get api-gateway URL for the deployed container app
-      uses: Azure/cli@v1
-      with:
-        inlineScript: |
-          az config set extension.use_dynamic_install=yes_without_prompt
-
-          FRONTEND_URL=$(az containerapp show \
-            -n ${{ env.API_GATEWAY }} \
-            -g ${{ env.CONTAINER_APPS_RG }} \
-            --query properties.configuration.ingress.fqdn \
-            -o tsv)
-
-          echo "View container apps version of api-gateway at: https://$FRONTEND_URL"
