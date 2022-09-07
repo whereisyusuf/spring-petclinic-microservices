@@ -485,6 +485,9 @@ open https://${SPRING_APPS_SERVICE}-${API_GATEWAY}.azuremicroservices.io/actuato
 open https://${SPRING_APPS_SERVICE}-${API_GATEWAY}.azuremicroservices.io/api/customer/actuator
 open https://${SPRING_APPS_SERVICE}-${API_GATEWAY}.azuremicroservices.io/api/customer/actuator/env
 open https://${SPRING_APPS_SERVICE}-${API_GATEWAY}.azuremicroservices.io/api/customer/actuator/configprops
+
+# Prometheus metrics for spring boot services
+open https://${SPRING_APPS_SERVICE}-${API_GATEWAY}.azuremicroservices.io/api/customer/actuator/prometheus
 ```
 
 #### Start monitoring Spring Boot apps and dependencies - in Application Insights
