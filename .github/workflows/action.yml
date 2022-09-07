@@ -259,20 +259,31 @@ jobs:
         inlineScript: |
           az config set extension.use_dynamic_install=yes_without_prompt
 
-          echo "Deploying api-gateway"
+          az containerapp show -n ${{ env.API_GATEWAY }} -g ${{ env.CONTAINER_APPS_RG }} -o table
 
-          az containerapp create \
-            --name ${{ env.API_GATEWAY }} \
-            --resource-group ${{ env.CONTAINER_APPS_RG }} \
-            --image "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}" \
-            --environment ${{ env.CONTAINER_APPS_ENV }} \
-            --registry-server ${{ env.CONTAINER_REGISTRY }}.azurecr.io \
-            --registry-username ${{ secrets.CONTAINER_REGISTRY_USERNAME }} \
-            --registry-password ${{ secrets.CONTAINER_REGISTRY_PASSWORD }} \
-            --min-replicas 1 \
-            --max-replicas 1 \
-            --cpu 1 \
-            --memory 2.0Gi \
-            --env-vars VETS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.VETS_SERVICE }}.azuremicroservices.io \
-                       VISITS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.VISITS_SERVICE }}.azuremicroservices.io \
-                       CUSTOMERS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.CUSTOMERS_SERVICE }}.azuremicroservices.io
+          if [[ $? != 0 ]]; then
+            echo "Container app (${{ env.API_GATEWAY }}) not found, creating a new one..."
+
+            az containerapp create \
+              --name ${{ env.API_GATEWAY }} \
+              --resource-group ${{ env.CONTAINER_APPS_RG }} \
+              --image "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}" \
+              --environment ${{ env.CONTAINER_APPS_ENV }} \
+              --registry-server ${{ env.CONTAINER_REGISTRY }}.azurecr.io \
+              --registry-username ${{ secrets.CONTAINER_REGISTRY_USERNAME }} \
+              --registry-password ${{ secrets.CONTAINER_REGISTRY_PASSWORD }} \
+              --min-replicas 1 \
+              --max-replicas 1 \
+              --cpu 1 \
+              --memory 2.0Gi \
+              --env-vars VETS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.VETS_SERVICE }}.azuremicroservices.io \
+                        VISITS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.VISITS_SERVICE }}.azuremicroservices.io \
+                        CUSTOMERS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.CUSTOMERS_SERVICE }}.azuremicroservices.io
+          else
+            echo "Container app (${{ env.API_GATEWAY }}) exists, updating..."
+
+            az containerapp update \
+                --name ${{ env.API_GATEWAY }} \
+                --resource-group ${{ env.CONTAINER_APPS_RG }} \
+                --image "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}"
+          fi
