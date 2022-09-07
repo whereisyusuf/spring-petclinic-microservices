@@ -12,3 +12,10 @@ spring:
   cloud:
     config:
       uri: http://config-server:8888
+---
+spring:
+  config:
+    activate:
+      on-profile: aca
+  cloud.config.enabled: false
+eureka.client.enabled: false
