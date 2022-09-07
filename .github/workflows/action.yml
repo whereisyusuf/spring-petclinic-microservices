@@ -7,10 +7,12 @@ on:
 env:
   AZURE_SUBSCRIPTION: ${{ secrets.AZURE_SUBSCRIPTION }} # define this secret in GitHub secrets
   SPRING_APPS_SERVICE: ${{ secrets.SPRING_APPS_SERVICE }} # define this secret in GitHub secrets
+  KEYVAULT: ${{ secrets.KEY_VAULT }} # define this secret in GitHub secrets
+
+  # ==== (OPTIONAL) Azure Container Apps ====:
   CONTAINER_APPS_ENV: ${{ secrets.CONTAINER_APPS_ENV }} # define this secret in GitHub secrets
   CONTAINER_APPS_RG: ${{ secrets.CONTAINER_APPS_RG }} # define this secret in GitHub secrets
   CONTAINER_REGISTRY: ${{ secrets.CONTAINER_REGISTRY }} # define this secret in GitHub secrets
-  KEYVAULT: ${{ secrets.KEY_VAULT }} # define this secret in GitHub secrets
 
   # ==== APPS ====:
   API_GATEWAY: api-gateway
@@ -35,7 +37,7 @@ env:
   
 jobs:
 
-  build:
+  build-jars:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
@@ -72,9 +74,9 @@ jobs:
         if-no-files-found: error
         retention-days: 7
 
-  deploy-api-server:
+  deploy-admin-server-springapps:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-jars
     timeout-minutes: 10
 
     steps:
@@ -95,42 +97,14 @@ jobs:
         azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
         action: deploy
         service-name: ${{ env.SPRING_APPS_SERVICE }}
-        app-name: ${{ env.API_GATEWAY }}
-        use-staging-deployment: false
-        package: ${{ github.workspace }}/${{ env.API_GATEWAY_JAR }}
-        jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
-
-  deploy-admin-server:
-    runs-on: ubuntu-latest
-    needs: build
-    timeout-minutes: 10
-
-    steps:
-
-    - name: Login with Key Vault SP (scoped to Resource Group)
-      uses: azure/login@v1
-      with:
-        creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-    - name: Download JAR files to deploy
-      uses: actions/download-artifact@v3.0.0
-      with:
-        name: petclinic-jars
-
-    - name: deploy
-      uses:  azure/spring-apps-deploy@v1
-      with:
-        azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
-        action: deploy
-        service-name: ${{ env.SPRING_APPS_SERVICE }}
         app-name: ${{ env.ADMIN_SERVER }}
         use-staging-deployment: false
         package: ${{ github.workspace }}/${{ env.ADMIN_SERVER_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
 
-  deploy-customer-service:
+  deploy-customer-service-springapps:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-jars
     timeout-minutes: 10
 
     steps:
@@ -156,10 +130,9 @@ jobs:
         package: ${{ github.workspace }}/${{ env.CUSTOMERS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=https://${{ env.KEYVAULT }}.vault.azure.net/
 
-
-  deploy-vets-service:
+  deploy-vets-service-springapps:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-jars
     timeout-minutes: 10
 
     steps:
@@ -185,9 +158,9 @@ jobs:
         package: ${{ github.workspace }}/${{ env.VETS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=https://${{ env.KEYVAULT }}.vault.azure.net/
 
-  deploy-visits-service:
+  deploy-visits-service-springapps:
     runs-on: ubuntu-latest
-    needs: build
+    needs: build-jars
     timeout-minutes: 10
 
     steps:
@@ -213,14 +186,43 @@ jobs:
         package: ${{ github.workspace }}/${{ env.VISITS_SERVICE_JAR }}
         jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql,key-vault -Dazure.keyvault.uri=https://${{ env.KEYVAULT }}.vault.azure.net/
 
-
-  deploy-to-Container-Apps:
-
+  deploy-api-server-springapps:
     runs-on: ubuntu-latest
-    needs: [deploy-customer-service,deploy-vets-service,deploy-visits-service]
-    
+    needs: [deploy-customer-service-springapps, deploy-vets-service-springapps, deploy-visits-service-springapps]
+    timeout-minutes: 10
+
     steps:
-    - name: Login with SP
+
+    - name: Login with Key Vault SP (scoped to Resource Group)
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Download JAR files to deploy
+      uses: actions/download-artifact@v3.0.0
+      with:
+        name: petclinic-jars
+
+    - name: deploy
+      uses: azure/spring-apps-deploy@v1
+      with:
+        azure-subscription: ${{ env.AZURE_SUBSCRIPTION }}
+        action: deploy
+        service-name: ${{ env.SPRING_APPS_SERVICE }}
+        app-name: ${{ env.API_GATEWAY }}
+        use-staging-deployment: false
+        package: ${{ github.workspace }}/${{ env.API_GATEWAY_JAR }}
+        jvm-options: -Xms2048m -Xmx2048m -Dspring.profiles.active=mysql
+
+  # OPTIONAL: If you want to also deploy the api-gateway to Container Apps
+  deploy-api-gateway-containerapps:
+    runs-on: ubuntu-latest
+    needs: [deploy-customer-service-springapps, deploy-vets-service-springapps, deploy-visits-service-springapps]
+    timeout-minutes: 10
+    if: ${{ env.CONTAINER_APPS_ENV != '' }}
+
+    steps:
+    - name: Login with Key Vault SP (scoped to Resource Group)
       uses: azure/login@v1
       with:
         creds: ${{ secrets.AZURE_CREDENTIALS }}
@@ -234,7 +236,12 @@ jobs:
         name: petclinic-jars
 
     - name: Build api-gateway container image
-      run: docker build . --file docker/Dockerfile-aca --tag "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}" --build-arg PORT=8080 --build-arg JAR_FILE=${{ env.API_GATEWAY_JAR }}
+      run: |
+        docker build . \
+          --file docker/Dockerfile-aca \
+          --tag "${{ env.CONTAINER_REGISTRY }}.azurecr.io/${{ env.API_GATEWAY }}:v1.0.${{ github.run_number }}" \
+          --build-arg PORT=8080 \
+          --build-arg JAR_FILE=${{ env.API_GATEWAY_JAR }}
 
     - name: Login to the Azure Container Registry  
       uses: azure/docker-login@v1
@@ -253,7 +260,8 @@ jobs:
         inlineScript: |
           az config set extension.use_dynamic_install=yes_without_prompt
 
-          echo Deploy app-gateway
+          echo "Deploying api-gateway"
+
           az containerapp create \
             --name ${{ env.API_GATEWAY }} \
             --resource-group ${{ env.CONTAINER_APPS_RG }} \
@@ -269,4 +277,3 @@ jobs:
             --env-vars VETS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.VETS_SERVICE }}.azuremicroservices.io \
                        VISITS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.VISITS_SERVICE }}.azuremicroservices.io \
                        CUSTOMERS_SERVICE_URL=https://${{ env.SPRING_APPS_SERVICE }}-${{ env.CUSTOMERS_SERVICE }}.azuremicroservices.io
-                       

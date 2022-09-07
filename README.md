@@ -773,6 +773,89 @@ Activate applications to load secrets from Azure Key Vault.
         --env
 ```
 
+## Unit-4 - Deploy api-gateway to Container Apps
+
+### Create container apps environment
+
+```bash
+CONTAINER_APPS_ENV="petclinic-apps"
+
+# Use the same Log Analytics workspace as the Spring Apps
+LOG_ANALYTICS_WORKSPACE_CLIENT_ID=$(az monitor log-analytics workspace show \
+    --query customerId -g $RESOURCE_GROUP -n $LOG_ANALYTICS --out tsv)
+
+LOG_ANALYTICS_WORKSPACE_CLIENT_SECRET=$(az monitor log-analytics workspace get-shared-keys \
+    --query primarySharedKey -g $RESOURCE_GROUP -n $LOG_ANALYTICS --out tsv)
+
+# Use the same App Insights resource as the Spring Apps
+APP_INSIGHTS_NAME=$SPRING_APPS_SERVICE
+APP_INSIGHTS_INSTRUMENTATION_KEY=$(az monitor app-insights component show --app $APP_INSIGHTS_NAME -g $RESOURCE_GROUP --query instrumentationKey -o tsv)
+
+az containerapp env create \
+  --name $CONTAINER_APPS_ENV \
+  --resource-group $RESOURCE_GROUP \
+  --location "$REGION" \
+  --logs-workspace-id $LOG_ANALYTICS_WORKSPACE_CLIENT_ID \
+  --logs-workspace-key $LOG_ANALYTICS_WORKSPACE_CLIENT_SECRET \
+  --dapr-instrumentation-key $APP_INSIGHTS_INSTRUMENTATION_KEY
+```
+
+### Create Azure container registry
+
+```bash
+CONTAINER_REGISTRY="petclinic$RANDOM"
+
+az acr create -n $CONTAINER_REGISTRY -g $RESOURCE_GROUP --sku Standard -l $REGION --admin-enabled
+```
+
+### Assign endpoints to Spring Apps APIs
+
+Because only the api-gateway component is being deployed into the container apps environment, this will require that the customer-service, vets-service, and visits-service be assigned endpoints.
+
+```bash
+az spring app update --name ${CUSTOMERS_SERVICE} --assign-endpoint true
+az spring app update --name ${VETS_SERVICE} --assign-endpoint true
+az spring app update --name ${VISITS_SERVICE} --assign-endpoint true
+```
+
+### Define GitHub Secrets for Container Apps deployments
+
+Use values from above to define the follow GitHub secrets.
+
+* `CONTAINER_APPS_ENV` -- name of Container Apps Environment
+* `CONTAINER_APPS_RG` -- resource group name of the Container Apps
+
+    For `CONTAINER_APPS_RG`, use the value of `$RESOURCE_GROUP`.
+
+* `CONTAINER_REGISTRY` -- name of ACR (Azure Container Registry)
+* `CONTAINER_REGISTRY_USERNAME` -- username of the ACR (requires admin enabled)
+
+    ```sh
+    CONTAINER_REGISTRY_USERNAME="$(az acr credential show -n $CONTAINER_REGISTRY -g $RESOURCE_GROUP --query username -o tsv)"
+    ```
+
+* `CONTAINER_REGISTRY_PASSWORD` -- password of the ACR (requies admin enabled)
+
+    ```sh
+    CONTAINER_REGISTRY_PASSWORD="$(az acr credential show -n $CONTAINER_REGISTRY -g $RESOURCE_GROUP --query passwords[0].value -o tsv)"
+    ```
+
+### Test the api-gateway running in Container Apps
+
+Trigger a build to deploy the `api-gateway` to container apps.
+
+```sh
+FRONTEND_INGRESS_URL=$(az containerapp show -n $API_GATEWAY -g $RESOURCE_GROUP --query properties.configuration.ingress.fqdn -o tsv)
+
+echo "Browse to: https://$FRONTEND_INGRESS_URL"
+```
+
+Access the site and stream logs to console (press CTRL+C to stop following log stream):
+
+```sh
+az containerapp logs show -n rating-api -g $RESOURCE_GROUP --follow --tail=50
+```
+
 ## Next Steps
 
 In this quickstart, you've deployed an existing Spring Boot-based app using Azure CLI, Terraform and GitHub Actions. To learn more about Azure Spring Apps, go to:
