@@ -845,9 +845,9 @@ Use values from above to define the follow GitHub secrets.
 Trigger a build to deploy the `api-gateway` to container apps.
 
 ```sh
-FRONTEND_INGRESS_URL=$(az containerapp show -n $API_GATEWAY -g $RESOURCE_GROUP --query properties.configuration.ingress.fqdn -o tsv)
+FRONTEND_URL=$(az containerapp show -n $API_GATEWAY -g $RESOURCE_GROUP --query properties.configuration.ingress.fqdn -o tsv)
 
-echo "Browse to: https://$FRONTEND_INGRESS_URL"
+echo "Browse to: https://$FRONTEND_URL"
 ```
 
 Access the site and stream logs to console (press CTRL+C to stop following log stream):
