@@ -219,7 +219,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [deploy-customer-service-springapps, deploy-vets-service-springapps, deploy-visits-service-springapps]
     timeout-minutes: 10
-    if: ${{ env.CONTAINER_APPS_ENV }} != ''
+    if: env.CONTAINER_APPS_ENV != ''
 
     steps:
     - name: Login with Key Vault SP (scoped to Resource Group)
