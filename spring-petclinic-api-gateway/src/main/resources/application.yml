@@ -49,6 +49,9 @@ spring:
             - Path=/api/customer/**
           filters:
             - StripPrefix=2
+  # Internationalization
+  messages:
+    basename:  messages/messages
 #from https://github.com/Azure-Samples/spring-petclinic-microservices-config/blob/master/api-gateway.yml
 zuul:
   prefix: /api
@@ -64,5 +67,4 @@ server:
     enabled: true
     mime-types: application/json,text/css,application/javascript
     min-response-size: 2048
-# Internationalization
-spring.messages.basename: messages/messages
+
